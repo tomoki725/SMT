@@ -16,7 +16,16 @@ if (process.env.NODE_ENV === 'development') {
 const isPartner = window.location.pathname.startsWith('/partner') || 
                   window.location.pathname.startsWith('/partner-entry') ||
                   window.location.search.includes('app=partner') ||
-                  process.env.REACT_APP_ENTRY_POINT === 'partner';
+                  process.env.REACT_APP_ENTRY_POINT === 'partner' ||
+                  window.REACT_APP_ENTRY_POINT === 'partner';
+
+console.log('🔍 パートナー判定デバッグ:');
+console.log('  pathname:', window.location.pathname);
+console.log('  startsWith /partner:', window.location.pathname.startsWith('/partner'));
+console.log('  process.env.REACT_APP_ENTRY_POINT:', process.env.REACT_APP_ENTRY_POINT);
+console.log('  window.REACT_APP_ENTRY_POINT:', window.REACT_APP_ENTRY_POINT);
+console.log('  isPartner:', isPartner);
+
 const AppComponent = isPartner ? PartnerApp : App;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
