@@ -4,13 +4,12 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase設定
 const firebaseConfig = {
-  projectId: "admn-45826",
-  appId: "1:528077412400:web:8a3b2ed21ba1d076d075f5",
-  storageBucket: "admn-45826.firebasestorage.app",
-  apiKey: "AIzaSyBtInwRgMTvaf1XK8RJsIv3slARY4RXTGY",
-  authDomain: "admn-45826.firebaseapp.com",
-  messagingSenderId: "528077412400",
-  measurementId: "G-0W2Y623VQX"
+  projectId: "psmt-6724f",
+  appId: "1:683825497775:web:0bec91982bc1b497a3365a",
+  storageBucket: "psmt-6724f.firebasestorage.app",
+  apiKey: "AIzaSyAgwYYikH_diGanJNLTHKyBmk-4-u6osHY",
+  authDomain: "psmt-6724f.firebaseapp.com",
+  messagingSenderId: "683825497775"
 };
 
 // Firebaseアプリを初期化

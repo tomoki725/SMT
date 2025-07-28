@@ -1,12 +1,12 @@
 {
   "projects": {
-    "default": "admn-45826"
+    "default": "psmt-6724f"
   },
   "targets": {
-    "admn-45826": {
+    "psmt-6724f": {
       "hosting": {
         "admin": [
-          "admn-45826"
+          "psmt-6724f"
         ]
       }
     }
