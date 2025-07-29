@@ -61,6 +61,12 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
+    // 案件ステータス履歴コレクション（Ver 2.20新規追加）
+    match /dealStatusHistory/{document} {
+      // 読み取り・書き込みを全て許可（本番環境では適切な認証を設定してください）
+      allow read, write: if true;
+    }
+    
     // その他のコレクションへのアクセスも許可（開発用）
     match /{document=**} {
       allow read, write: if true;
