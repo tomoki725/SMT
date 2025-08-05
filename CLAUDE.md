@@ -810,3 +810,114 @@ const calculateClientYoYData = (clientProjectData, currentYear, lastYear) => {
 - ログ記録業務の効率化
 - KPI管理の柔軟性向上
 - https://psmt-6724f.web.app への正常デプロイ確認
+
+### 2025年8月5日 - v3.8.0 週次トピックス機能実装完了
+**実行したタスク**:
+1. ✅ サマリー（全体）の月次目標値Firebase永続化機能実装
+2. ✅ 目標値の「結果/目標」表示機能追加（達成率%表示なし）
+3. ✅ 月別粗利推移グラフの表示問題修正
+4. ✅ サマリー（全体）に月次トピックス欄追加
+5. ✅ 個人サマリーに週次トピックス機能実装
+6. ✅ サマリー（全体）のトピックス機能を週次に変更
+
+**新機能**:
+- **月別目標値永続化**: 新規商談数・新規受注数・目標客単価の月別設定をFirebaseに保存
+- **目標達成表示**: KPIカードに「結果/目標」形式での表示機能
+- **週次トピックス（個人）**: 個人別・週単位でのトピックス記録・管理機能
+- **週次トピックス（全体）**: 全体サマリーでの週単位トピックス管理機能
+- **週次ナビゲーション**: 前週・次週ボタンによる週間切り替え機能
+
+**技術実装**:
+```javascript
+// 月別目標値データ構造（overallTargets コレクション）
+{
+  targets: {
+    "2025-01": { newDeals: 10, newOrders: 3, targetUnitPrice: 500000 },
+    // ... 12月まで
+  },
+  updatedAt: Timestamp
+}
+
+// 週次トピックスデータ構造
+// 個人用（personalTopics コレクション）
+{
+  id: "{representativeId}_{year}_{weekNumber}",
+  representativeId: "担当者ID",
+  representativeName: "担当者名",
+  year: 2025,
+  weekNumber: 2,
+  weekStartDate: "2025-01-06",
+  weekEndDate: "2025-01-12",
+  topics: "週次トピックス内容...",
+  updatedAt: Timestamp
+}
+
+// 全体用（overallTopics コレクション）
+{
+  id: "overall_{year}_{weekNumber}",
+  type: "overall",
+  year: 2025,
+  weekNumber: 2,
+  weekStartDate: "2025-01-06",
+  weekEndDate: "2025-01-12",
+  topics: "全体の週次トピックス内容...",
+  updatedAt: Timestamp
+}
+```
+
+**UI機能**:
+- **週次ナビゲーション**: `[← 前週] 2025年1月6日 - 1月12日 (第2週) [次週 →]`
+- **自動読み込み**: 週を変更すると自動的にその週のデータを取得
+- **手動保存**: 保存ボタンクリックでFirebaseに保存
+- **文字数制限なし**: 無制限の入力が可能
+
+**配置場所**:
+- **サマリー（全体）**: KPIカードとクライアント別YoY分析の間
+- **個人サマリー**: KPI統計カードと予算達成率推移の間
+
+**成果**:
+- 月別目標値の永続化により設定値が保持されるように改善
+- 週単位での詳細な振り返りと情報管理が可能
+- 個人レベルと全体レベルでの週次情報共有機能実現
+- PersonalSummaryとOverallSummaryで一貫した操作感を提供
+- https://psmt-6724f.web.app への正常デプロイ確認
+
+### v3.9.0 (2025年8月5日) - レイアウト統一・幅標準化更新完了
+**実行したタスク**:
+1. ✅ 実績ページ（BudgetResultsPage）の幅設定を基準として分析
+2. ✅ 全8ページのメインコンテナ幅を統一化
+3. ✅ maxWidth: '1400px' を全ページに適用
+4. ✅ デプロイして動作確認
+
+**修正した8つのページコンポーネント**:
+1. **サマリー（全体）** - OverallSummary コンポーネント
+2. **サマリー（個人用）** - PersonalSummary コンポーネント  
+3. **アクションログ** - ActionLogsList コンポーネント
+4. **ログ記録** - LogEntryPage コンポーネント
+5. **受注管理** - SalesResults コンポーネント
+6. **担当者マスター** - RepresentativesMaster コンテナ
+7. **提案メニューマスター** - ProposalMenuMaster コンポーネント
+8. **KPI管理** - TargetsManagement コンポーネント
+
+**適用したCSSスタイル**:
+```javascript
+style: { padding: '20px', maxWidth: '1400px', margin: '0 auto' }
+```
+
+**新機能・改善点**:
+- **レイアウト統一性**: 全ページで一貫した最大幅（1400px）を適用
+- **読みやすさ向上**: 広いディスプレイでも適切な幅で表示されるよう改善
+- **中央配置**: すべてのコンテンツが画面中央に配置され、バランスの取れた表示
+- **改行削減**: 余計な改行が削減され、レイアウトが大幅に改善
+- **一貫したユーザー体験**: 実績ページと同じ幅基準で全ページが統一
+
+**技術実装**:
+- 各ページコンポーネントのメインreturn文を修正
+- React.createElement('div', null, [...]) → React.createElement('div', { style: { padding: '20px', maxWidth: '1400px', margin: '0 auto' } }, [...])
+- 実績ページ（BudgetResultsPage）の基準に合わせた標準化
+
+**成果**:
+- 全ページでのレイアウト一貫性実現
+- UI/UX品質の大幅向上
+- 余計な改行やレイアウト崩れの解消
+- https://psmt-6724f.web.app への正常デプロイ確認
