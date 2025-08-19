@@ -485,6 +485,53 @@ function ProgressDashboard() {
     }
     setReceivedOrderModal({ show: false, deal: null });
   };
+
+  // 新規/既存タイプ変更処理
+  const handleDealTypeChange = async (dealId, newDealType) => {
+    try {
+      console.log('🔄 案件タイプ更新開始:', dealId, newDealType);
+      
+      const progressRef = doc(db, 'progressDashboard', dealId);
+      await updateDoc(progressRef, {
+        dealType: newDealType,
+        updatedAt: serverTimestamp()
+      });
+      
+      console.log('✅ 案件タイプ更新成功');
+      
+      // ローカル状態を更新
+      setDeals(prev => prev.map(deal => 
+        deal.id === dealId ? { ...deal, dealType: newDealType } : deal
+      ));
+      
+      // 成功時のフィードバック
+      const dealTypeElement = document.querySelector(`[data-deal-id="${dealId}"] select[value="${newDealType || ''}"]`);
+      if (dealTypeElement && dealTypeElement !== document.querySelector(`[data-deal-id="${dealId}"] select[value="${deals.find(d => d.id === dealId)?.status}"]`)) {
+        dealTypeElement.style.background = '#d4edda';
+        dealTypeElement.style.borderColor = '#c3e6cb';
+        setTimeout(() => {
+          dealTypeElement.style.background = getDealTypeColor(newDealType);
+          dealTypeElement.style.borderColor = '#ddd';
+        }, 1000);
+      }
+      
+    } catch (error) {
+      console.error('💥 案件タイプ更新エラー:', error);
+      alert('案件タイプの更新に失敗しました。もう一度お試しください。');
+      // エラー時は元の状態に戻す
+      await fetchProgressData();
+    }
+  };
+
+  // 新規/既存タイプ用カラーコード取得
+  const getDealTypeColor = (dealType) => {
+    const DEAL_TYPE_COLORS = {
+      '新規': '#e3f2fd', // 淡い青色（新規顧客）
+      '既存': '#e8f5e8', // 淡い緑色（既存顧客）
+      '': '#f8f9fa'      // グレー（未設定）
+    };
+    return DEAL_TYPE_COLORS[dealType] || DEAL_TYPE_COLORS[''];
+  };
   
   const fetchIntroducers = async () => {
     try {
@@ -743,6 +790,7 @@ function ProgressDashboard() {
         proposalMenu: updatedDeal.proposalMenu,
         representative: updatedDeal.representative,
         partnerRepresentative: updatedDeal.partnerRepresentative || null,
+        dealType: updatedDeal.dealType || '',
         ...introducerInfo,
         updatedAt: serverTimestamp()
       });
@@ -865,8 +913,9 @@ function ProgressDashboard() {
                 {sortConfig.key !== 'proposalMenu' && <FiMinus />}
               </span>
             </TableHeaderCell>
+            <TableHeaderCell style={{ minWidth: '120px' }}>クライアント</TableHeaderCell>
+            <TableHeaderCell style={{ minWidth: '90px' }}>新規/既存</TableHeaderCell>
             <TableHeaderCell style={{ minWidth: '140px' }}>担当者（社内／パートナー）</TableHeaderCell>
-            <TableHeaderCell style={{ minWidth: '80px' }}>紹介者</TableHeaderCell>
             <TableHeaderCell style={{ minWidth: '80px' }}>ステータス</TableHeaderCell>
             <TableHeaderCell 
               sortable 
@@ -907,6 +956,31 @@ function ProgressDashboard() {
               <TableCell style={{ minWidth: '160px' }}>
                 {deal.proposalMenu}
               </TableCell>
+              <TableCell style={{ minWidth: '120px' }}>
+                {deal.clientName || '-'}
+              </TableCell>
+              <TableCell style={{ minWidth: '90px', padding: '0.5rem' }}>
+                <select
+                  value={deal.dealType || ''}
+                  onChange={(e) => handleDealTypeChange(deal.id, e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '4px 8px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem',
+                    backgroundColor: getDealTypeColor(deal.dealType),
+                    color: '#000',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <option value="">未設定</option>
+                  <option value="新規">新規</option>
+                  <option value="既存">既存</option>
+                </select>
+              </TableCell>
               <TableCell style={{ minWidth: '200px' }}>
                 {/* Ver 2.2: 担当者の併記表示（社内／パートナー） */}
                 {deal.representative && deal.partnerRepresentative ? (
@@ -923,7 +997,6 @@ function ProgressDashboard() {
                   '-'
                 )}
               </TableCell>
-              <TableCell style={{ minWidth: '120px' }}>{getIntroducerName(deal)}</TableCell>
               <TableCell data-deal-id={deal.id} style={{ minWidth: '120px', padding: '0.5rem' }}>
                 <select
                   value={deal.status}
@@ -1079,6 +1152,29 @@ function ProgressDashboard() {
                 <option value="インハウスキャンプ">インハウスキャンプ</option>
                 <option value="IFキャスティング">IFキャスティング</option>
                 <option value="運用コックピット">運用コックピット</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>新規/既存</label>
+              <select
+                value={editModal.deal?.dealType || ''}
+                onChange={(e) => setEditModal(prev => ({
+                  ...prev,
+                  deal: { ...prev.deal, dealType: e.target.value }
+                }))}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontSize: '1rem',
+                  backgroundColor: getDealTypeColor(editModal.deal?.dealType || ''),
+                  fontWeight: 'bold'
+                }}
+              >
+                <option value="">未設定</option>
+                <option value="新規">新規</option>
+                <option value="既存">既存</option>
               </select>
             </div>
             <div style={{ marginBottom: '1rem' }}>

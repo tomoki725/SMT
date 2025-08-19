@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { FiSave, FiRefreshCw, FiCalendar, FiUser, FiFileText, FiPlus, FiAlertCircle, FiX, FiZap } from 'react-icons/fi';
+import { FiSave, FiRefreshCw, FiCalendar, FiUser, FiFileText, FiPlus, FiAlertCircle, FiX, FiZap, FiTag } from 'react-icons/fi';
 import { PROPOSAL_MENUS, PARTNER_PROPOSAL_MENUS, SALES_REPRESENTATIVES, STATUSES, DEPARTMENT_NAMES } from '../data/constants.js';
 import { introducers } from '../data/mockData.js';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -342,11 +342,23 @@ function LogEntryPage() {
   };
   
   const partnerCompany = getPartnerCompany();
+
+  // 新規/既存タイプ用カラーコード取得
+  const getDealTypeColor = (dealType) => {
+    const DEAL_TYPE_COLORS = {
+      '新規': '#e3f2fd', // 淡い青色（新規顧客）
+      '既存': '#e8f5e8', // 淡い緑色（既存顧客）
+      '': '#f8f9fa'      // グレー（未設定）
+    };
+    return DEAL_TYPE_COLORS[dealType] || DEAL_TYPE_COLORS[''];
+  };
   
   const [formData, setFormData] = useState({
     title: '',
     productName: '',
     proposalMenu: '',
+    clientName: '',
+    dealType: '',
     representative: '',
     introducerId: '',
     actionDate: new Date().toISOString().split('T')[0],
@@ -505,6 +517,8 @@ function LogEntryPage() {
     
     if (searchParams.get('productName')) prefillData.productName = searchParams.get('productName');
     if (searchParams.get('proposalMenu')) prefillData.proposalMenu = searchParams.get('proposalMenu');
+    if (searchParams.get('clientName')) prefillData.clientName = searchParams.get('clientName');
+    if (searchParams.get('dealType')) prefillData.dealType = searchParams.get('dealType');
     if (searchParams.get('representative')) prefillData.representative = searchParams.get('representative');
     if (searchParams.get('introducerId')) {
       const introducerIdStr = searchParams.get('introducerId');
@@ -575,6 +589,10 @@ function LogEntryPage() {
     if (!formData.proposalMenu) {
       errors.proposalMenu = '提案メニューを選択してください';
     }
+
+    if (!formData.clientName.trim()) {
+      errors.clientName = 'クライアント名は必須です';
+    }
     
     if (!formData.representative) {
       errors.representative = '対応者を選択してください';
@@ -642,6 +660,8 @@ function LogEntryPage() {
         const newDeal = {
           productName: formData.productName,
           proposalMenu: formData.proposalMenu,
+          clientName: formData.clientName,
+          dealType: formData.dealType || '',
           // パートナー案件の場合は担当者を分離
           representative: isPartnerView ? '増田 陽' : formData.representative || '',
           partnerRepresentative: isPartnerView ? formData.representative || '' : null,
@@ -671,6 +691,8 @@ function LogEntryPage() {
         
         // 既存案件のステータスと詳細を更新
         const updateData = {
+          clientName: formData.clientName || existingDeal.data().clientName || '',
+          dealType: formData.dealType || existingDeal.data().dealType || '',
           status: formData.status, // ステータスは必須なので常に更新
           lastContactDate: formData.actionDate || new Date().toISOString().split('T')[0],
           nextAction: formData.nextAction || existingDeal.data().nextAction,
@@ -1153,6 +1175,47 @@ function LogEntryPage() {
                 {formErrors.proposalMenu}
               </div>
             )}
+          </FormGroup>
+
+          <FormGroup>
+            <Label>
+              <FiUser />
+              クライアント名 *
+            </Label>
+            <Input
+              type="text"
+              name="clientName"
+              value={formData.clientName}
+              onChange={handleInputChange}
+              placeholder="例：ABC株式会社"
+              required
+              style={formErrors.clientName ? { borderColor: '#e74c3c' } : {}}
+            />
+            {formErrors.clientName && (
+              <div style={{ color: '#e74c3c', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                {formErrors.clientName}
+              </div>
+            )}
+          </FormGroup>
+
+          <FormGroup>
+            <Label>
+              <FiTag />
+              新規/既存
+            </Label>
+            <Select
+              name="dealType"
+              value={formData.dealType}
+              onChange={handleInputChange}
+              style={{
+                backgroundColor: getDealTypeColor(formData.dealType),
+                fontWeight: 'bold'
+              }}
+            >
+              <option value="">未設定</option>
+              <option value="新規">新規</option>
+              <option value="既存">既存</option>
+            </Select>
           </FormGroup>
 
           <FormGroup>
